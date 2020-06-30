@@ -8,7 +8,7 @@
 # Attribution-NonCommercial-ShareAlike 4.0 International License.
 # See: http://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 
-class Search_problem(object):
+class   Search_problem(object):
     """A search problem consists of:
     * a start node
     * a neighbors function that gives the neighbors of a node
@@ -35,7 +35,7 @@ class Search_problem(object):
 
 class Arc(object):
     """An arc has a from_node and a to_node node and a (non-negative) cost"""
-    def __init__(self, from_node, to_node, cost=1, action=None):
+    def __init__(self, from_node, to_node, cost=0, action=None):
         assert cost >= 0, ("Cost cannot be negative for"+
                            str(from_node)+"->"+str(to_node)+", cost: "+str(cost))
         self.from_node = from_node
