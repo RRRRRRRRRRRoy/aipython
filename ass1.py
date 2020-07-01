@@ -5,6 +5,13 @@
 # STEP 2: Use arc consistency during the search process
 # STEP 3: Use greedy search to find the best solution
 ############################################################################################################
+# Solutions:
+# The reason of designing week_to_num and time_to_num in this way
+# by this designing we can use the operator // or % to get the weekday and time.
+# You can also use the 24-hour timing method
+# eg: let Sunday be the first day, monday is 24 * 1 = 24
+# the disadvantage of this method is that it is not intuitive as the following method
+############################################################################################################
 
 import sys
 from cspProblem import CSP, Constraint
@@ -51,11 +58,10 @@ class Search_with_AC_from_Cost_CSP(Search_with_AC_from_CSP):
         self.soft_cons = csp.soft_constraints
         self.soft_cost = soft_cost
 
-    ############################################################################################################
-    ########################################## heuristic function ##############################################
+############################################################################################################
+########################################## heuristic function ##############################################
 
     def heuristic(self, node):
-        cost = 0
         cost_list = list()
         for task in node:
             if task in self.soft_cons:
@@ -73,8 +79,7 @@ class Search_with_AC_from_Cost_CSP(Search_with_AC_from_CSP):
                 if len(temp) != 0:
                     mini = min(temp)
                     cost_list.append(mini)
-        cost = sum(cost_list)
-        return cost
+        return sum(cost_list)
 
 
 ############################################################################################################
@@ -192,7 +197,7 @@ def hard_endin_range(day1, time1, day2, time2):
     return end_range
 
 ############################################################################################################
-########################################## Tool Functions ################################################
+########################################## Tool Functions ##################################################
 # function 1: check_content_in_line
 # check content in the line or not based on the bool
 # if bool is empty(default value is True), then check word in line or not
@@ -221,16 +226,21 @@ def check_content_in_line(check_word, line, bool=True):
         else:
             return False
 
-
+# show the final result in the last
 def show_result(solution):
+    # check NULL
     if not solution:
         print('No solution')
     else:
+        # start to get the value from the list and print
         solution = solution.end()
         for task in solution:
+            # traversal the dictionary and get the value of each key
+            # get the concrete weeekday for example mon, tue and wed...
             for key in week_to_num.keys():
                 if week_to_num[key] == list(solution[task])[0][0] // 10:
                     day = key
+            # get the concrete time, such as 12am...
             for key in time_to_num.keys():
                 if time_to_num[key] == list(solution[task])[0][0] % 10:
                     time = key
@@ -238,25 +248,41 @@ def show_result(solution):
             print(f'{task}:{day} {time}')
         print(f'cost:{problem.heuristic(solution)}')
 
+############################################################################################################
+########################################## Test Entry ######################################################
+# 1.sys.argv is used to test in the terminal or CSE server
+#
+# 2.input.txt is used to test in the local IDE
+# this project(assignment) is set up by Pycharm
+############################################################################################################
 
-
-# test in terminal
 # filename = sys.argv[1]
-# input1.txt is used to do the local test in Pycharm
+
 filename = 'input1.txt'
 
-# The reason of designing week_to_num and time_to_num in this way
-# by this designing we can use the operator // or % to get the weekday and time.
-# You can also use the 24-hour timing method
-# eg: let Sunday be the first day, monday is 24 * 1 = 24
-# the disadvantage of this method is that it is not intuitive as the following method
+
+
+############################################################################################################
+########################################## Tool dictionart #################################################
+# 1. using dictionary to connect the rewrite function in class
+# 2. using 'input_key_words' dictionary to check whether the input is valid or not
+# 3. using the 'operation_key_word' to check each line, check whether the key word in the line or not
+# 4. using the 'operate_binary_constraints' to connect the previous function definition, easy to correct errors.
+# 5. using the 'operate_hard_constraints' to select which kind of constraints should we use
+# advantage : easy to correct errors
+# disadvantage : a little bit hard to read
+# There will be annotation to show which function should be chose
+############################################################################################################
 
 week_to_num = {'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5}
 time_to_num = {'9am': 1, '10am': 2, '11am': 3, '12pm': 4, '1pm': 5, '2pm': 6, '3pm': 7, '4pm': 8, '5pm': 9}
+
 input_key_words = {0: "\n", 1: "#", 2: "task", 3: "constraint", 4: "domain"}
 operation_key_word = {0: "same", 1: "starts", 2: "ends", 3: "before", 4: "after"}
 operate_binary_constraints = {'before': binary_before, 'after': binary_after, 'same': binary_same_day,
                               'starts': binary_same_start}
+
+# function list
 operate_hard_constraints = {1: hard_day, 2: hard_time, 3: hard_start_before_daytime, 4: hard_start_before_time,
                             5: hard_start_after_daytime, 6: hard_start_after_time, 7: hard_end_before_daytime,
                             8: hard_end_before_time, 9: hard_end_after_daytime, 10: hard_end_after_time,
@@ -283,13 +309,10 @@ for line in file:
     # Remove '\n' and avoid the normal annotation
     if (line == input_key_words[0]) or (line[0] == input_key_words[1]):
         continue
-    # Like COMP9021 read file operation
-    # avoid space, empty line , and other punctuation
-    line = line.strip()
-    line = line.replace('\n', '')
-    line = line.replace(',', '')
-    line = line.replace('-', ' ')
-    line = line.split(' ')
+
+    # Like COMP9021 read file operation, avoid invalid space, empty line, and other punctuations
+    line = line.strip().replace('\n', '').replace(',', '').replace('-', ' ').split(' ')
+
     ### get task and duration
     if line[0] == input_key_words[2]:
         # test the content of line
