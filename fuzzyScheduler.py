@@ -288,7 +288,7 @@ def show_result(solution):
 #filename = sys.argv[1]
 
 # local test
-filename = 'input1.txt'
+filename = 'input2.txt'
 # print(filename)
 
 ############################################################################################################
