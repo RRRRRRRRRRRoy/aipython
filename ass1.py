@@ -64,19 +64,24 @@ class Search_with_AC_from_Cost_CSP(Search_with_AC_from_CSP):
     def heuristic(self, node):
         cost_list = list()
         for task in node:
-            if task in self.soft_cons:
+            if check_content_in_line(task, self.soft_cons):
                 temp = list()
                 expect_time = self.soft_cons[task]
                 for index in node[task]:
+                #for key in node.keys():
                     actual_time = index[1]
                     if actual_time <= expect_time:
                         temp.append(0)
                     else:
                         delay_days = (actual_time // 10 - expect_time // 10) * 24
                         delay_hours = (actual_time % 10) - (expect_time % 10)
-                        temp.append(self.soft_cost[task] * (delay_days + delay_hours))
+                        # cost per time -----> time * cost
+                        get_cost = self.soft_cost[task] * (delay_days + delay_hours)
+                        temp.append(get_cost)
 
-                if len(temp) != 0:
+                if len(temp) == 0:
+                    break
+                else:
                     mini = min(temp)
                     cost_list.append(mini)
         return sum(cost_list)
@@ -128,6 +133,8 @@ def binary_after(task1, task2):
 #       def yyyyyyy();
 #           return yyyyyy
 #        return xxxxxxx
+# Can also use the previous binary constraint to replace hard constraints
+# The following code will all apply Lambda function
 ############################################################################################################
 
 # To make the code more clean, just using the lambda func
@@ -139,60 +146,56 @@ def hard_day(day):
 
 def hard_time(time):
     # can also use the same way(lambda expression) as hard_day to express, e.g.
-    '''
-    def hardtime(val):
-    return val[0] % 10 == time
-    '''
     hardtime = lambda x: x[0] % 10 == time
     return hardtime
 
-# check whether starts before the day and time
-def hard_start_before_daytime(day, time):
+# check whether starts before the daytime
+def hard_starts_before_daytime(day, time):
     startsbefore = lambda x: x[0] <= day * 10 + time
     return startsbefore
 
-#
-def hard_start_before_time(time):
+# start before time
+def hard_starts_before_time(time):
     startsbefore = lambda value: value[0] % 10 <= time
     return startsbefore
 
-
-def hard_start_after_daytime(day, time):
+# start after daytime
+def hard_starts_after_daytime(day, time):
     startsafter = lambda x: x[0] >= day * 10 + time
     return startsafter
 
-
-def hard_start_after_time(time):
+# start after time
+def hard_starts_after_time(time):
     startsafter = lambda value: value[0] % 10 >= time
     return startsafter
 
-
-def hard_end_before_daytime(day, time):
+# end before daytime
+def hard_ends_before_daytime(day, time):
     endbefore = lambda value: value[1] <= day * 10 + time
     return endbefore
 
-
-def hard_end_before_time(time):
+# end before time
+def hard_ends_before_time(time):
     endbefore = lambda x: x[1] % 10 <= time
     return endbefore
 
-
-def hard_end_after_daytime(day, time):
+# end after daytime
+def hard_ends_after_daytime(day, time):
     endafter = lambda x: x[1] >= day * 10 + time
     return endafter
 
-
-def hard_end_after_time(time):
+# end after time
+def hard_ends_after_time(time):
     endafter = lambda val: val[1] % 10 >= time
     return endafter
 
-
-def hard_startin_range(day1, time1, day2, time2):
+# start in range need 2 pairs of parameters
+def hard_startsin_range(day1, time1, day2, time2):
     start_range = lambda x: day1 * 10 + time1 <= x[0] <= day2 * 10 + time2
     return start_range
 
-
-def hard_endin_range(day1, time1, day2, time2):
+# end in range need 2 pairs of parameters
+def hard_endsin_range(day1, time1, day2, time2):
     end_range = lambda x: day1 * 10 + time1 <= x[1] <= day2 * 10 + time2
     return end_range
 
@@ -209,6 +212,7 @@ def hard_endin_range(day1, time1, day2, time2):
 # check whether the solution is empty or not
 # them traversal the dictionary and show the result
 ############################################################################################################
+
 
 def check_content_in_line(check_word, line, bool=True):
     # boole will effect in/not in
@@ -238,11 +242,13 @@ def show_result(solution):
             # traversal the dictionary and get the value of each key
             # get the concrete weeekday for example mon, tue and wed...
             for key in week_to_num.keys():
-                if week_to_num[key] == list(solution[task])[0][0] // 10:
+                list_solution = list(solution[task])
+                if week_to_num[key] == list_solution[0][0] // 10:
                     day = key
             # get the concrete time, such as 12am...
             for key in time_to_num.keys():
-                if time_to_num[key] == list(solution[task])[0][0] % 10:
+                list_solution = list(solution[task])
+                if time_to_num[key] == list_solution[0][0] % 10:
                     time = key
 
             print(f'{task}:{day} {time}')
@@ -258,9 +264,9 @@ def show_result(solution):
 
 # filename = sys.argv[1]
 
+# local test
 filename = 'input1.txt'
-
-
+print(filename)
 
 ############################################################################################################
 ########################################## Tool dictionart #################################################
@@ -273,30 +279,25 @@ filename = 'input1.txt'
 # disadvantage : a little bit hard to read
 # There will be annotation to show which function should be chose
 ############################################################################################################
-
+# set week number from 1-5, like monday to friday
 week_to_num = {'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5}
+# The assignments question is between 9am to 5 pm
+# Therefore in this dictionary you can find 9 which is the 9 work hours in a day
 time_to_num = {'9am': 1, '10am': 2, '11am': 3, '12pm': 4, '1pm': 5, '2pm': 6, '3pm': 7, '4pm': 8, '5pm': 9}
 
+# check the input
 input_key_words = {0: "\n", 1: "#", 2: "task", 3: "constraint", 4: "domain"}
 operation_key_word = {0: "same", 1: "starts", 2: "ends", 3: "before", 4: "after"}
 operate_binary_constraints = {'before': binary_before, 'after': binary_after, 'same': binary_same_day,
                               'starts': binary_same_start}
 
-# function list
-operate_hard_constraints = {1: hard_day, 2: hard_time, 3: hard_start_before_daytime, 4: hard_start_before_time,
-                            5: hard_start_after_daytime, 6: hard_start_after_time, 7: hard_end_before_daytime,
-                            8: hard_end_before_time, 9: hard_end_after_daytime, 10: hard_end_after_time,
-                            11: hard_startin_range, 12: hard_endin_range}
-domain = list()
+# function list to connect relative connection with the hard constraints functions
+operate_hard_constraints = {1: hard_day, 2: hard_time, 3: hard_starts_before_daytime, 4: hard_starts_before_time,
+                            5: hard_starts_after_daytime, 6: hard_starts_after_time, 7: hard_ends_before_daytime,
+                            8: hard_ends_before_time, 9: hard_ends_after_daytime, 10: hard_ends_after_time,
+                            11: hard_startsin_range, 12: hard_endsin_range}
 
-# double loop to create a list with weekday and time
-for i in range(1, 6):
-    for j in range(1, 10):
-        week_n_time = i * 10 + j
-        domain.append(week_n_time)
-        # check the current of week_n_time
-        # print(week_n_time)
-
+# Initialize the domain, create a list which is used to store different value of domain
 task_duration = dict()
 task_domain = dict()
 soft_cost = dict()
@@ -304,6 +305,18 @@ soft_constraint = dict()
 hard_constraint = list()
 task_list = list()
 
+
+# double loop to create a list with weekday and time
+domain = list()
+for i in range(1, 6):
+    for j in range(1, 10):
+        # check the current of week_n_time when programming
+        # print(week_n_time)
+        week_n_time = i * 10 + j
+        domain.append(week_n_time)
+
+# I/O operation of files, get each line in the test file
+# read only !
 file = open(filename, 'r', encoding='utf-8')
 for line in file:
     # Remove '\n' and avoid the normal annotation
@@ -320,26 +333,34 @@ for line in file:
         int_duration = int(line[2])
         task_duration.setdefault(line[1], int(line[2]))
         check_set = set()
-        duration = int_duration
-        for item in domain:
-            if item % 10 + duration <= 9:
-                check_set.add(item)
-        task_domain[line[1]] = set((x, x + duration) for x in check_set)
+        index = 0
+        # get element in domain
+        while index < len(domain):
+            if domain[index] % 10 + int_duration < 10:
+                check_set.add(domain[index])
+            index+=1
+        task_domain[line[1]] = set((x, x + int_duration) for x in check_set)
 
-    # check binary constraints
+    # check constraints
+    # key word with index 3 is constraint
     elif line[0] == input_key_words[3]:
         task1 = line[::-1][-2]
         task2 = line[::-1][0]
-        # check before
+        # check binary_before
         if check_content_in_line(operation_key_word[3],line):
+            # input a tuple in Constraint()
+            # operation_keyword 3---> before
             hard_constraint.append(Constraint((task1, task2), operate_binary_constraints[operation_key_word[3]]))
-        # check after
+        # check binary_after
+        # operation_keyword 4---> before
         if check_content_in_line(operation_key_word[4],line):
             hard_constraint.append(Constraint((task1, task2), operate_binary_constraints[operation_key_word[4]]))
-        # check same day
+        # check binary_sameday
+        # operation_keyword 0---> before
         if check_content_in_line(operation_key_word[0],line):
             hard_constraint.append(Constraint((task1, task2), operate_binary_constraints[operation_key_word[0]]))
-        # check starts at
+        # check binary_startsat
+        # operation_keyword 1---> before
         if check_content_in_line(operation_key_word[1],line):
             hard_constraint.append(Constraint((task1, task2), operate_binary_constraints[operation_key_word[1]]))
 
@@ -374,52 +395,59 @@ for line in file:
 
         elif check_content_in_line(operation_key_word[1] , line) and\
                 check_content_in_line(operation_key_word[3] , line):
-            # domain t starts before day time
-            if len(line) == 6:
-                day = week_to_num[line[-2]]
-                time = time_to_num[line[-1]]
-                hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[3](day, time)))
             # domain t starts before time
             if len(line) == 5:
                 time = time_to_num[line[-1]]
                 hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[4](time)))
 
-        elif check_content_in_line(operation_key_word[1] , line) and\
-                check_content_in_line(operation_key_word[4] , line):
-            # domain t starts after day time
+            # domain t starts before day time
             if len(line) == 6:
                 day = week_to_num[line[-2]]
                 time = time_to_num[line[-1]]
-                hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[5](day, time)))
+                hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[3](day, time)))
+
+
+        elif check_content_in_line(operation_key_word[1] , line) and\
+                check_content_in_line(operation_key_word[4] , line):
             # domain t starts after time
             if len(line) == 5:
                 time = time_to_num[line[-1]]
                 hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[6](time)))
 
+            # domain t starts after day time
+            if len(line) == 6:
+                day = week_to_num[line[-2]]
+                time = time_to_num[line[-1]]
+                hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[5](day, time)))
+
         elif check_content_in_line(operation_key_word[2] , line) and\
                 check_content_in_line(operation_key_word[3] , line):
             # domain t ends before day time
+            if len(line) == 5:
+                time = time_to_num[line[-1]]
+                hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[8](time)))
+
             if len(line) == 6:
                 day = week_to_num[line[-2]]
                 time = time_to_num[line[-1]]
                 hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[7](day, time)))
             # domain t ends before time
-            if len(line) == 5:
-                time = time_to_num[line[-1]]
-                hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[8](time)))
+
 
         # check 'ends' and 'after' in line or not
         elif check_content_in_line(operation_key_word[2] , line) and\
                 check_content_in_line(operation_key_word[4] , line):
             # domain t ends after day time
-            if len(line) == 6:
-                day = week_to_num[line[-2]]
-                time = time_to_num[line[-1]]
-                hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[9](day, time)))
             # domain t ends after time
             if len(line) == 5:
                 time = time_to_num[line[-1]]
                 hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[10](time)))
+
+            if len(line) == 6:
+                day = week_to_num[line[-2]]
+                time = time_to_num[line[-1]]
+                hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[9](day, time)))
+
         # day-time range
         else:
             # domain t starts in day time day time
@@ -438,7 +466,9 @@ for line in file:
                 time2 = time_to_num[line[7]]
                 hard_constraint.append(Constraint(tuple_task, operate_hard_constraints[12](day1, time1, day2, time2)))
 
+# create object of New_CSP, which contains soft_constraint and soft cost
 csp = New_CSP(task_domain, hard_constraint, soft_constraint, soft_cost)
+# create the object by using the new class, which has contained the heuristic function
 problem = Search_with_AC_from_Cost_CSP(csp)
 solution = AStarSearcher(problem).search()
 
