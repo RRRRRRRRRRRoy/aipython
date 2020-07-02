@@ -2,13 +2,11 @@
 task, t1 5
 task, t2 2
 task, t3 2
-task, t4 4
 
 # two binary constraints
 constraint, t1 before t2
 constraint, t2 before t3
 constraint, t2 same-day t3
-constraint, t3 before t4
 
 # domain constraint
 domain, t1 mon
@@ -16,5 +14,4 @@ domain, t2 wed
 domain, t2 starts-in tue 12pm-fri 3pm
 
 # soft deadlines
-domain, t1 ends-by tue 3pm 10
-domain, t3 ends-by mon 3pm 44
+domain, t3 ends-by tue 3pm 10
