@@ -9,7 +9,7 @@
 # The reason of designing week_to_num and time_to_num in this way
 # by this designing we can use the operator // or % to get the weekday and time.
 # You can also use the 24-hour timing method, or 100 even 1000.
-# eg: let Sunday be the first day, monday is 10 * 1 + 1
+# eg: let Sunday be the first day, monday is 100 * 1 + 1
 #     There is 0 between both day and time easy to debug
 #     by using // operator we can get the day is Mon
 #     by using % we can get the time is 9 am
@@ -81,8 +81,8 @@ class Search_with_AC_from_Cost_CSP(Search_with_AC_from_CSP):
                         temp.add(0)
                     else:
                         # cost per time -----> time * cost
-                        delay_day = (actual_time // 10 - expect_time // 10) * 24
-                        delay_hour = (actual_time % 10) - (expect_time % 10)
+                        delay_day = (actual_time // 100 - expect_time // 100) * 24
+                        delay_hour = (actual_time % 100) - (expect_time % 100)
                         temp.add(self.soft_cost[task] * (delay_day + delay_hour))
                 if len(temp) == 0:
                     break
@@ -95,8 +95,8 @@ class Search_with_AC_from_Cost_CSP(Search_with_AC_from_CSP):
 ######################################## binary constraints ################################################
 # check the order of 2 tasks. same day or before.
 def binary_same_day(task1, task2):
-    get_task1_day = task1[0] // 10
-    get_task2_day = task2[0] // 10
+    get_task1_day = task1[0] // 100
+    get_task2_day = task2[0] // 100
     if get_task1_day != get_task2_day:
         return False
     else:
@@ -144,73 +144,73 @@ def binary_after(task1, task2):
 # To make the code more clean, just using the lambda func
 def hard_day(day):
     # lambda function to express
-    hardday = lambda x: x[0] // 10 == day
+    hardday = lambda x: x[0] // 100 == day
     return hardday
 
 
 def hard_time(time):
     # can also use the same way(lambda expression) as hard_day to express, e.g.
-    hardtime = lambda x: x[0] % 10 == time
+    hardtime = lambda x: x[0] % 100 == time
     return hardtime
 
 
 # check whether starts before the daytime
 def hard_starts_before_daytime(day, time):
-    startsbefore = lambda x: x[0] <= day * 10 + time
+    startsbefore = lambda x: x[0] <= day * 100 + time
     return startsbefore
 
 
 # start before time
 def hard_starts_before_time(time):
-    startsbefore = lambda value: value[0] % 10 <= time
+    startsbefore = lambda value: value[0] % 100 <= time
     return startsbefore
 
 
 # start after daytime
 def hard_starts_after_daytime(day, time):
-    startsafter = lambda x: x[0] >= day * 10 + time
+    startsafter = lambda x: x[0] >= day * 100 + time
     return startsafter
 
 
 # start after time
 def hard_starts_after_time(time):
-    startsafter = lambda value: value[0] % 10 >= time
+    startsafter = lambda value: value[0] % 100 >= time
     return startsafter
 
 
 # end before daytime
 def hard_ends_before_daytime(day, time):
-    endsbefore = lambda value: value[1] <= day * 10 + time
+    endsbefore = lambda value: value[1] <= day * 100 + time
     return endsbefore
 
 
 # end before time
 def hard_ends_before_time(time):
-    endsbefore = lambda x: x[1] % 10 <= time
+    endsbefore = lambda x: x[1] % 100 <= time
     return endsbefore
 
 
 # end after daytime
 def hard_ends_after_daytime(day, time):
-    endsafter = lambda x: x[1] >= day * 10 + time
+    endsafter = lambda x: x[1] >= day * 100 + time
     return endsafter
 
 
 # end after time
 def hard_ends_after_time(time):
-    endsafter = lambda val: val[1] % 10 >= time
+    endsafter = lambda val: val[1] % 100 >= time
     return endsafter
 
 
 # start in range need 2 pairs of parameters
 def hard_startsin_range(day1, time1, day2, time2):
-    starts_range = lambda x: day1 * 10 + time1 <= x[0] <= day2 * 10 + time2
+    starts_range = lambda x: day1 * 100 + time1 <= x[0] <= day2 * 100 + time2
     return starts_range
 
 
 # end in range need 2 pairs of parameters
 def hard_endsin_range(day1, time1, day2, time2):
-    ends_range = lambda x: day1 * 10 + time1 <= x[1] <= day2 * 10 + time2
+    ends_range = lambda x: day1 * 100 + time1 <= x[1] <= day2 * 100 + time2
     return ends_range
 
 
@@ -267,11 +267,11 @@ def show_result(solution):
             # get the concrete weeekday for example mon, tue and wed...
             for key in week_to_num:
                 list_solution = list(solution[task])
-                if week_to_num[key] == list_solution[0][0] // 10:
+                if week_to_num[key] == list_solution[0][0] // 100:
                     day = key
             # get the concrete time, such as 12am...
             for key in time_to_num:
-                if time_to_num[key] == list_solution[0][0] % 10:
+                if time_to_num[key] == list_solution[0][0] % 100:
                     time = key
             print(f'{task}:{day} {time}')
         print(f'cost:{problem.heuristic(solution)}',end='')
@@ -334,7 +334,7 @@ for i in range(1, 6):
     for j in range(1, 10):
         # check the current of week_n_time when programming
         # print(week_n_time)
-        week_n_time = i * 10 + j
+        week_n_time = i * 100 + j
         domain.append(week_n_time)
 
 # I/O operation of files, get each line in the test file
@@ -358,7 +358,7 @@ for line in file:
         index = 0
         # get element in domain
         while index < len(domain):
-            if domain[index] % 10 + int_duration <= 9:
+            if domain[index] % 100 + int_duration <= 9:
                 check_set.add(domain[index])
             index += 1
         task_domain[line[1]] = set((x, x + int_duration) for x in check_set)
@@ -395,7 +395,7 @@ for line in file:
         # get day and time, then change them into integer
         day = get_day(line, week_to_num, 4)
         time = get_time(line, time_to_num, 5)
-        change_info_2_num = day * 10 + time
+        change_info_2_num = day * 100 + time
         soft_cost.setdefault(task, int(line[-1]))
         soft_constraint.setdefault(task, change_info_2_num)
 
