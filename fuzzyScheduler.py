@@ -266,13 +266,13 @@ def show_result(solution):
             # traversal the dictionary and get the value of each key
             # get the concrete weeekday for example mon, tue and wed...
             for key in week_to_num.keys():
-                list_solution = list(solution[task])
-                if week_to_num[key] == list_solution[0][0] // 100:
+                list_solution = list(solution[task])[0][0]
+                if week_to_num[key] == list_solution // 100:
                     day = key
             # get the concrete time, such as 12am...
             for key in time_to_num.keys():
-                list_solution = list(solution[task])
-                if time_to_num[key] == list_solution[0][0] % 100:
+                list_solution = list(solution[task])[0][0]
+                if time_to_num[key] == list_solution % 100:
                     time = key
             print(f'{task}:{day} {time}')
         print(f'cost:{problem.heuristic(solution)}',end='')
