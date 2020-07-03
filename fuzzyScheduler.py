@@ -64,33 +64,44 @@ class Search_with_AC_from_Cost_CSP(Search_with_AC_from_CSP):
         self.soft_cons = csp.soft_constraints
         self.soft_cost = soft_cost
 
-    ############################################################################################################
-    ########################################## heuristic function ##############################################
+############################################################################################################
+########################################## heuristic function ##############################################
 
     def heuristic(self, node):
         # double check the type of the node ---> dictionary
         # print(type(node))
-        cost_list = list()
+        cost_list = set()
         for task, value in node.items():
-            if check_content_in_line(task, self.soft_cons):
+            if not check_content_in_line(task, self.soft_cons):
+                continue
+            else:
                 temp = set()
+                # get constraints ---> except hour
                 expect_time = self.soft_cons[task]
-                for item in list(value):
+                value_to_list = list(value)
+                for item in value_to_list:
                     # for key in node.keys():
                     actual_time = item[1]
+                    # actual < expect ----> no cost
                     if actual_time <= expect_time:
                         temp.add(0)
+                    # actual > expect ----> cost ---> cost * hour
                     elif actual_time > expect_time:
                         # cost per time -----> time * cost
+                        # day ---> hour
                         delay_day_to_hour = (actual_time // 100 - expect_time // 100) * 24
+                        # hour--->hour
                         delay_hour = (actual_time % 100) - (expect_time % 100)
-                        temp.add(self.soft_cost[task] * (delay_day_to_hour + delay_hour))
+                        total_hour = delay_hour + delay_day_to_hour
+                        temp.add(self.soft_cost[task] * total_hour)
                 if len(temp) == 0:
                     break
                 else:
-                    cost_list.append(min(temp))
+                    get_min_temp_cost = min(temp)
+                    cost_list.add(get_min_temp_cost)
         # get the final cost
-        return sum(cost_list)
+        sum_of_cost = sum(cost_list)
+        return sum_of_cost
 
 
 ############################################################################################################
@@ -301,7 +312,7 @@ def show_result(solution):
 # Test in the terminal or CSE server
 filename = sys.argv[1]
 # local test
-# filename = 'input8.txt'
+# filename = 'input1.txt'
 # print(filename)
 
 ############################################################################################################
